@@ -2,10 +2,11 @@
 
 namespace Upio\UpCache;
 
+// require the libs loader
 require UP_CACHE_LIBS_PATH . '/loader.php';
-require UP_CACHE_INC_PATH . '/types/LifecycleTypes.php';
-require UP_CACHE_INC_PATH . '/types/ResourceTypes.php';
-require UP_CACHE_RULES_PATH . '/IUpCacheRules.php';
+//require UP_CACHE_INC_PATH . '/types/LifecycleTypes.php';
+//require UP_CACHE_INC_PATH . '/types/ResourceTypes.php';
+//require UP_CACHE_RULES_PATH . '/IUpCacheRules.php';
 
 use Upio\UpCache\Inc\Types\LifecycleTypes;
 use Upio\UpCache\Inc\Types\ResourceTypes;
