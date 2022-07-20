@@ -1,12 +1,14 @@
 Up Cache Aggressive Caching 
 ==================
 
-Up Cache is an aggressive caching plugin for WordPress build with developers in mind. On it's core Up Cache is fully extensible in order to write your own rules by just implementing one small interface on your theme or plugin.
+Up Cache is an aggressive caching plugin for WordPress build with developers in mind. 
+On it's core Up Cache is fully extensible in order to write your own rules by just implementing 
+one small interface on your theme or plugin.
 
 How it works
 ------------------
 From the moment that Up Cache plugin is installed and activated, 
-all assets (css, js) are minified, unified two a single file and cached under the uploads dir `wp-content/uploads/up-cache/*`. 
+all assets (css, js) are minified, unified to a single file and cached under the uploads dir `wp-content/uploads/up-cache/*`. 
 Then Up Cache dequeue all WordPress assets and enqueue the minified ones. 
 
 In order to exclude assets from minification visit the plugin options under menu `Tools->UpCache` .
