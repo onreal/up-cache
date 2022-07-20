@@ -27,17 +27,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 define( 'UP_CACHE_PATH', plugin_dir_path( __FILE__ ) );
 const UP_CACHE_LIBS_PATH  = UP_CACHE_PATH . 'libs';
-const UP_CACHE_RULES_PATH = UP_CACHE_PATH . 'inc/rules';
 const UP_CACHE_INC_PATH   = UP_CACHE_PATH . 'inc/';
-const UP_ADMIN_ADMIN_PATH = UP_CACHE_PATH . 'inc/admin';
+const UP_CACHE_RULES_PATH = UP_CACHE_INC_PATH . 'Rules';
+const UP_CACHE_ADMIN_PATH = UP_CACHE_INC_PATH . 'Admin';
+const UP_CACHE_CONTROLLERS_PATH = UP_CACHE_INC_PATH . 'Controllers';
+const UP_CACHE_TYPES_PATH = UP_CACHE_INC_PATH . 'Types';
 
 include_once UP_CACHE_PATH . 'Autoloader.php';
-//require UP_ADMIN_ADMIN_PATH . '/UpCacheAdmin.php';
-//require UP_CACHE_INC_PATH . '/controllers/Endpoints.php';
-//require UP_CACHE_PATH . 'UpCacheBase.php';
 
 use Upio\UpCache\Admin\UpCacheAdmin;
-use Upio\UpCache\Inc\Controllers\Endpoints;
+use Upio\UpCache\Controllers\Endpoints;
 
 class UpCache {
 	// TODO

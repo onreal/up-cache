@@ -2,10 +2,7 @@
 
 namespace Upio\UpCache\Rules;
 
-//require UP_CACHE_INC_PATH . '/types/LifecycleTypes.php';
-//require UP_CACHE_PATH . 'UpCacheBase.php';
-
-use Upio\UpCache\Inc\Types\LifecycleTypes;
+use Upio\UpCache\Types\LifecycleTypes;
 use Upio\UpCache\UpCacheBase;
 
 class UpCachePerfmatters extends UpCacheBase implements IUpCacheRules {

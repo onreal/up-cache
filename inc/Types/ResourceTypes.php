@@ -1,6 +1,6 @@
 <?php
 
-namespace Upio\UpCache\Inc\Types;
+namespace Upio\UpCache\Types;
 
 abstract class ResourceTypes {
 	const CSS = 'css';

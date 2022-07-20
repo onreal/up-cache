@@ -1,6 +1,6 @@
 <?php
 
-namespace Upio\UpCache\Inc\Controllers;
+namespace Upio\UpCache\Controllers;
 
 use WP_REST_Response;
 
