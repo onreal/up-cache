@@ -2,7 +2,6 @@
 
 namespace Upio\UpCache;
 
-// require the libs loader
 require UP_CACHE_LIBS_PATH . '/loader.php';
 
 use Upio\UpCache\Types\LifecycleTypes;
@@ -154,7 +153,6 @@ class UpCacheBase {
 	/**
 	 * @param $post_slug
 	 * @param $assets_path
-	 *
 	 * @return string|null
 	 */
 	protected function getPostCacheDirectory( $post_slug, $assets_path ): ?string {
@@ -169,7 +167,6 @@ class UpCacheBase {
 	/**
 	 * @param $post_slug
 	 * @param $assets_path
-	 *
 	 * @return string|null
 	 */
 	protected function getCacheDirectoryUri( $post_slug, $assets_path ): ?string {
@@ -206,18 +203,17 @@ class UpCacheBase {
 	private static function redeclareResources( $wp_resource, $sources ): array {
 		$removed   = self::getResourcesByType( $sources, LifecycleTypes::Removed );
 		$resources = array();
-		foreach ( $wp_resource->queue as $handle ) {
-			if ( empty( $wp_resource->registered[ $handle ]->src )
-			     || ! str_contains( $wp_resource->registered[ $handle ]->src, get_site_url() ) ) {
+		foreach ( $wp_resource->queue as $key ) {
+			if ( empty( $wp_resource->registered[ $key ]->src )
+			     || ! str_contains( $wp_resource->registered[ $key ]->src, get_site_url() ) ) {
 				continue;
 			}
 
-			if ( in_array( $handle, $removed ) ) {
+			if ( in_array( $key, $removed ) ) {
 				continue;
 			}
-			$resources[ $handle ] = $wp_resource->registered[ $handle ]->src;
+			$resources[ $key ] = $wp_resource->registered[ $key ]->src;
 		}
-
 		return $resources;
 	}
 
@@ -293,9 +289,9 @@ class UpCacheBase {
 	 */
 	private static function minifySources( $sources, $page_path, $minifier, $name ): void {
 		$required = self::getResourcesByType( $sources, LifecycleTypes::Required );
-		$ignored  = self::getResourcesByType( $sources, LifecycleTypes::Ignore );
-		foreach ( $required as $handle => $src ) {
-			if ( in_array( $src, $ignored ) ) {
+		$ignored  = self::getResourcesByType( $sources, LifecycleTypes::Ignored );
+		foreach ( $required as $key => $src ) {
+			if ( in_array( $key, $ignored ) ) {
 				continue;
 			}
 			$minifier->add( str_replace( get_site_url() . '/', ABSPATH, $src ) );
@@ -312,7 +308,10 @@ class UpCacheBase {
 	 * @areturn void
 	 */
 	private static function dequeueResources( $sources, $source_type ): void {
-		foreach ( $sources[ LifecycleTypes::Required ] as $key => $value ) {
+		$ignored  = self::getResourcesByType( $sources, LifecycleTypes::Ignored );
+		$required  = self::getResourcesByType( $sources, LifecycleTypes::Required );
+		foreach ( $required as $key => $value ) {
+			if ( !empty( $ignored ) && in_array( $key, $ignored ) ) { continue; }
 			if ( $source_type == ResourceTypes::CSS ) {
 				wp_dequeue_style( $key );
 				wp_deregister_style( $key );
