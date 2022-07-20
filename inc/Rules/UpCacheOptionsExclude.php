@@ -7,17 +7,23 @@ use Upio\UpCache\UpCacheBase;
 
 class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules {
 	public static function getType(): string {
-		return LifecycleTypes::Ignore;
+		return LifecycleTypes::Ignored;
 	}
 
 	public function setCss(): void {
 		$excluded = $this->getPluginOption( 'ignore_css_files_min' );
-		self::setStyles( array( self::getType() => $excluded ) );
+		if ( !$excluded || empty( $excluded ) ) {
+			return;
+		}
+		self::setStyles( array( self::getType() => explode( ',', $excluded ) ) );
 	}
 
 	public function setJs(): void {
 		$excluded = $this->getPluginOption( 'ignore_js_files_min' );
-		self::setScripts( array( self::getType() => $excluded ) );
+		if ( !$excluded || empty( $excluded ) ) {
+			return;
+		}
+		self::setStyles( array( self::getType() => explode( ',', $excluded ) ) );
 	}
 
 	public function setIntegrationName(): void {
