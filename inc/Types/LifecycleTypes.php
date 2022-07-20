@@ -3,7 +3,7 @@
 namespace Upio\UpCache\Types;
 
 abstract class LifecycleTypes {
-	const Ignore = 'ignore';
+	const Ignored = 'ignored';
 	const Removed = 'removed';
 	const Required = 'required';
 }
