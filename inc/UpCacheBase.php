@@ -288,17 +288,18 @@ class UpCacheBase {
     public function runCaching(): void {
         // set assets path
         $path = $this->getPath();
-        // check if need to proceed into caching process
-        if ( self::isPageCached( $path ) ) { return; }
         // get all caching rules
         $this->runCacheRules();
         // redeclare assets by rules
         $this->redeclareStyles();
         $this->redeclareScripts();
-        // minify the resources that need to
-        self::minify( $path );
-        // make resources to gzip
-        $this->gzip( $path );
+        // check if needed to proceed into caching process
+        if ( !self::isPageCached( $path ) ) {
+            // minify the resources that need to
+            self::minify( $path );
+            // make resources to gzip
+            $this->gzip( $path );
+        }
         // dequeue all resources
         self::dequeue();
         // enqueue as one again
