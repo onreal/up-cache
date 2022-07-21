@@ -1,14 +1,15 @@
 <?php
 /*
-Plugin Name: UpCache
-Description: UpCache is an aggressive assets caching with developers in mind. You can create your own advanced caching rules by using the interface, or add simple ignore rules from Tools->UpCache
+Plugin Name: UpCache Aggressive Caching
+Plugin URI: https://github.com/onreal/up-cache
+Description: Customize WordPress with powerful, professional and intuitive fields.
 Version: 1.0.0
-Author: UPIO
-Licence: GPLv2 or later
-Text Domain: upio-up-cache
+Author: Margarit Koka <UPIO>
 Author URI: https://upio.gr/
+Update URI: https://github.com/onreal/up-cache
+Text Domain: upio-up-cache
 License: GPLv2
- */
+*/
 
 /*
 This program is free software; you can redistribute it and/or modify
