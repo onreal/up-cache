@@ -4,6 +4,7 @@ namespace Upio\UpCache;
 
 require UP_CACHE_LIBS_PATH . '/loader.php';
 
+use Upio\UpCache\Types\AssetFileExtension;
 use Upio\UpCache\Types\LifecycleTypes;
 use Upio\UpCache\Types\ResourceTypes;
 use Upio\UpCache\Rules;
@@ -273,22 +274,32 @@ class UpCacheBase {
         add_action( 'wp_enqueue_scripts', array( $this, 'runCaching' ), 101 );
     }
 
+    public static function isPageCached( $path ): bool {
+        if ( file_exists( $path . '/' . AssetFileExtension::Styles )
+            && file_exists( $path . '/' . AssetFileExtension::Scripts ) ) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @return void
      */
     public function runCaching(): void {
+        // set assets path
+        $path = $this->getPath();
+        // check if need to proceed into caching process
+        if ( self::isPageCached( $path ) ) { return; }
         // get all caching rules
         $this->runCacheRules();
         // redeclare assets by rules
         $this->redeclareStyles();
         $this->redeclareScripts();
-        // set assets path
-        $path = $this->getPath();
         // minify the resources that need to
         self::minify( $path );
         // make resources to gzip
         $this->gzip( $path );
-        // dequeue all resources resources
+        // dequeue all resources
         self::dequeue();
         // enqueue as one again
         self::enqueue();
@@ -300,8 +311,8 @@ class UpCacheBase {
      * @return void
      */
     private static function minify( $path ): void {
-        self::minifySources( self::getStyles(), $path, new Minify\CSS(), 'up-cache.css' );
-        self::minifySources( self::getScripts(), $path, new Minify\JS(), 'up-cache.js' );
+        self::minifySources( self::getStyles(), $path, new Minify\CSS(), AssetFileExtension::Styles );
+        self::minifySources( self::getScripts(), $path, new Minify\JS(), AssetFileExtension::Scripts );
     }
 
     private function gzip( $path ): void {
@@ -332,8 +343,8 @@ class UpCacheBase {
             define('ENFORCE_GZIP', true);
         }
 
-        wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/up-cache.css' );
-        wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/up-cache.js',
+        wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/' . AssetFileExtension::Styles );
+        wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/' . AssetFileExtension::Scripts,
             array( 'jquery' ), null, true );
     }
 
