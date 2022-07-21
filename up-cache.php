@@ -2,7 +2,7 @@
 /*
 Plugin Name: UpCache Aggressive Caching
 Plugin URI: https://github.com/onreal/up-cache
-Description: Customize WordPress with powerful, professional and intuitive fields.
+Description: Up Cache is an aggressive caching plugin for WordPress build with developers in mind. On it's core Up Cache is fully extensible in order to write your own rules by just implementing one small interface on your theme or plugin.
 Version: 1.0.0
 Author: Margarit Koka <UPIO>
 Author URI: https://upio.gr/
@@ -40,22 +40,6 @@ use Upio\UpCache\Admin\UpCacheAdmin;
 use Upio\UpCache\Controllers\Endpoints;
 
 class UpCache {
-	// TODO
-	// 1 Get all styles
-	// 2 Perfmatter support, exclude everything that is inside of perfmatter (css and js)
-	// 3 Buddyboss theme support
-	// 4 dequeue all scripts and styles
-	// 5 check file versions before proceed
-	// 6 minify the allowed ones
-	// 7 enqueue a single minified where contains everything
-	// 8 set clear cache button
-	// 9 create an option page with basic info only
-	// Plugin options,
-	// only logged out users ?
-	// enable disable cache option
-	// add perfmatter support
-	// excluded scripts and styles
-	// check CDN options
 	private $cacheBase;
 
 	public function enableAdmin() {
