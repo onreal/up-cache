@@ -52,6 +52,6 @@ class Gzip
                 $isGzip = true;
             }
         }
-        return apply_filters( 'upio_up_cache_g1zip_enable', $isGzip );
+        return apply_filters( 'upio_up_cache_gzip_enable', $isGzip );
     }
 }
