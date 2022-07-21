@@ -7,6 +7,7 @@ require UP_CACHE_LIBS_PATH . '/loader.php';
 use Upio\UpCache\Types\LifecycleTypes;
 use Upio\UpCache\Types\ResourceTypes;
 use Upio\UpCache\Rules;
+use Upio\UpCache\Helpers;
 use MatthiasMullie\Minify;
 
 class UpCacheBase {
@@ -14,6 +15,17 @@ class UpCacheBase {
     private static array $styles = array();
     private static string $supportName;
     private array $pluginOptions = array();
+    private Helpers\Gzip $gzipHelper;
+
+    /**
+     * @param array $pluginOptions
+     */
+    public function __construct(array $pluginOptions)
+    {
+        if (Helpers\Gzip::isGzipEnabled()) {
+            $this->gzipHelper = new Helpers\Gzip();
+        }
+    }
 
     /**
      * @return array
@@ -274,9 +286,11 @@ class UpCacheBase {
         $this->redeclareStyles();
         $this->redeclareScripts();
         // set assets path
-        $page_path = $this->getPath();
+        $path = $this->getPath();
         // minify the resources that need to
-        self::minify( $page_path );
+        self::minify( $path );
+        // make resources to gzip
+        $this->gzip( $path );
         // dequeue all resources resources
         self::dequeue();
         // enqueue as one again
@@ -284,13 +298,21 @@ class UpCacheBase {
     }
 
     /**
-     * @param $page_path
+     * @param $path
      *
      * @return void
      */
-    private static function minify( $page_path ): void {
-        self::minifySources( self::getStyles(), $page_path, new Minify\CSS(), 'up-cache.css' );
-        self::minifySources( self::getScripts(), $page_path, new Minify\JS(), 'up-cache.js' );
+    private static function minify( $path ): void {
+        self::minifySources( self::getStyles(), $path, new Minify\CSS(), 'up-cache.css' );
+        self::minifySources( self::getScripts(), $path, new Minify\JS(), 'up-cache.js' );
+    }
+
+    private function gzip( $path ): void {
+        if (!Helpers\Gzip::isGzipEnabled()) {
+            return;
+        }
+        $this->gzipSources( $path, 'up-cache.css');
+        $this->gzipSources( $path, 'up-cache.js');
     }
 
     /**
@@ -305,19 +327,23 @@ class UpCacheBase {
      * @return void
      */
     private static function enqueue(): void {
-        wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/up-cache.css' );
-        wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/up-cache.js',
+        $gz_ext = '';
+        if (Helpers\Gzip::isGzipEnabled()) {
+            $gz_ext = '.gz';
+        }
+        wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/up-cache.css' . $gz_ext );
+        wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/up-cache.js' . $gz_ext,
             array( 'jquery' ), null, true );
     }
 
     /**
      * @param $sources
-     * @param $page_path
+     * @param $path
      * @param $minifier
      * @param $name
      * @return void
      */
-    private static function minifySources( $sources, $page_path, $minifier, $name ): void {
+    private static function minifySources($sources, $path, $minifier, $name ): void {
         $required = self::getResourcesByType( $sources, LifecycleTypes::Required );
         $ignored  = self::getResourcesByType( $sources, LifecycleTypes::Ignored );
 
@@ -328,8 +354,20 @@ class UpCacheBase {
             $minifier->add( str_replace( get_site_url() . '/', ABSPATH, $src ) );
         }
 
-        $res_path = $page_path . '/' . $name;
+        $res_path = $path . '/' . $name;
         $minifier->minify( $res_path );
+    }
+
+    /**
+     * @param $path
+     * @param $name
+     * @return false|string
+     * @author Margarit Koka
+     */
+    private function gzipSources ($path, $name )
+    {
+        $res_path = $path . '/' . $name;
+        return $this->gzipHelper->gzCompressFile($res_path);
     }
 
     /**
