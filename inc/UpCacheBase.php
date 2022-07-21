@@ -218,7 +218,7 @@ class UpCacheBase {
                 continue;
             }
 
-            if ( self::validateSourceOrigin( $wp_resource->registered[ $key ]->src ) ) {
+            if ( !self::validateSourceOrigin( $wp_resource->registered[ $key ]->src ) ) {
                 continue;
             }
 
