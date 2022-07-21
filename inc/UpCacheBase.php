@@ -31,8 +31,8 @@ class UpCacheBase {
     protected function getPluginOptions(): array {
         if ( ! $this->pluginOptions ) {
             $this->pluginOptions = is_multisite()
-                ? get_blog_option( get_current_blog_id(), 'up_cache_options' )
-                : get_option( 'up_cache_options' );
+                ? get_blog_option( get_current_blog_id(), 'up_cache_options', array() )
+                : get_option( 'up_cache_options', array() );
         }
 
         return $this->pluginOptions;
@@ -41,10 +41,14 @@ class UpCacheBase {
     /**
      * @param $option
      *
-     * @return string|null
+     * @return string|null|false
      */
     public function getPluginOption( $option ): ?string {
-        return $this->getPluginOptions()[ $option ];
+        if ( !array_key_exists( $option, $options = $this->getPluginOptions() ) )
+        {
+            return false;
+        }
+        return $options[ $option ];
     }
 
     /**
@@ -320,8 +324,8 @@ class UpCacheBase {
         if (!Helpers\Gzip::isGzipEnabled()) {
             return;
         }
-        $this->gzipSources( $path, 'up-cache.css');
-        $this->gzipSources( $path, 'up-cache.js');
+        $this->gzipSources( $path, AssetFileExtension::Styles );
+        $this->gzipSources( $path, AssetFileExtension::Scripts );
     }
 
     /**

@@ -61,6 +61,23 @@ class UpCache {
 	}
 
 	public function activate() {
+        $options = array(
+            'is_active' => '0',
+            'is_perfmatters_active' => '0',
+            'ignore_css_files_min' => '',
+            'ignore_js_files_min' => '',
+            'is_buddyboss_active' => '0',
+            'site_status' => array(
+                'is_gzip_enabled_on_server' => ''
+            ),
+            'config' => array(
+                'keep_data_after_remove' => '1'
+            ) );
+        if ( is_multisite() )  {
+            update_blog_option( get_current_blod_id(), 'up_cache_options', $options );
+        } else {
+            update_option( 'up_cache_options', $options );
+        }
 	}
 
 	public function deactivate() {
