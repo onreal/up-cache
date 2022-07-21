@@ -126,8 +126,7 @@ class UpCacheBase {
             if ( !array_key_exists( $type, $extension ) || empty( $extension[ $type ] ) ) {
                 $extension[ $type ] = array();
             }
-
-            array_push( $extension[ $type ], $items );
+            $extension[ $type ] = array_merge( $extension[ $type ], $items );
         }
 
         return $extension;
@@ -319,8 +318,7 @@ class UpCacheBase {
      * @return void
      */
     private static function minifySources( $sources, $page_path, $minifier, $name ): void {
-        $required = self::getResourcesByType( $sources, LifecycleTypes::Required )[0];
-
+        $required = self::getResourcesByType( $sources, LifecycleTypes::Required );
         $ignored  = self::getResourcesByType( $sources, LifecycleTypes::Ignored );
 
         foreach ( $required as $key => $src ) {
@@ -342,8 +340,9 @@ class UpCacheBase {
      */
     private static function dequeueResources( $sources, $source_type ): void {
         $ignored  = self::getResourcesByType( $sources, LifecycleTypes::Ignored );
-        $required  = self::getResourcesByType( $sources, LifecycleTypes::Required )[0];
+        $required  = self::getResourcesByType( $sources, LifecycleTypes::Required );
         foreach ( $required as $key => $value ) {
+
             if ( in_array( $key, $ignored ) ) { continue; }
             if ( $source_type == ResourceTypes::CSS ) {
                 wp_dequeue_style( $key );
