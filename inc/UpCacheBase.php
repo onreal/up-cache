@@ -167,14 +167,22 @@ class UpCacheBase {
     }
 
     /**
-     * @param $post_slug
-     * @param $assets_path
      * @return string|null
      */
-    protected function getCacheDirectoryUri( $post_slug, $assets_path ): ?string {
+    protected static function getCacheDirectoryUri(): ?string {
+        global $post;
         $uploads_dir = wp_get_upload_dir();
 
-        return $uploads_dir['baseurl'] . '/up-cache/' . $assets_path . $post_slug;
+        return $uploads_dir['baseurl'] . '/up-cache/' . self::getAssetsPath() . $post->post_name;
+    }
+
+    /**
+     * @param $src
+     * @return bool
+     */
+    private static function validateSourceOrigin ($src ): bool
+    {
+        return strpos( $src, get_site_url() ) !== false;
     }
 
     /**
@@ -206,8 +214,11 @@ class UpCacheBase {
         $removed   = self::getResourcesByType( $sources, LifecycleTypes::Removed );
         $resources = array();
         foreach ( $wp_resource->queue as $key ) {
-            if ( empty( $wp_resource->registered[ $key ]->src )
-                || ! str_contains( $wp_resource->registered[ $key ]->src, get_site_url() ) ) {
+            if ( empty( $wp_resource->registered[ $key ]->src ) ) {
+                continue;
+            }
+
+            if ( self::validateSourceOrigin( $wp_resource->registered[ $key ]->src ) ) {
                 continue;
             }
 
@@ -220,10 +231,38 @@ class UpCacheBase {
     }
 
     /**
+     * @return string
+     */
+    private static function getAssetsPath (): string
+    {
+        $assets_path = '';
+        $query_obj = get_queried_object();
+        // set cache directory for post
+        if ( is_page() ) {
+            $assets_path = 'page/';
+        } elseif ( is_tax() || is_category() ) {
+            $assets_path = 'tax/' . $query_obj->taxonomy . '/';
+        } elseif ( is_single() ) {
+            $assets_path = 'post/' . $query_obj->post_type . '/';
+        }
+
+        return $assets_path;
+    }
+
+    /**
+     * @return string|null
+     */
+    private function getPath (): ?string
+    {
+        global $post;
+        return $this->getPostCacheDirectory( $post->post_name, self::getAssetsPath() );
+    }
+
+    /**
      * @return void
      */
     public function startCaching(): void {
-        add_action( 'wp_enqueue_scripts', array( $this, 'runCaching' ), 99 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'runCaching' ), 101 );
     }
 
     /**
@@ -235,32 +274,14 @@ class UpCacheBase {
         // redeclare assets by rules
         $this->redeclareStyles();
         $this->redeclareScripts();
-
-        $assets_path = '';
-        global $post;
-        $query_obj = get_queried_object();
-        // set cache directory for post
-        if ( is_page() ) {
-            $assets_path = 'page/';
-        } elseif ( is_tax() || is_category() ) {
-            $assets_path = 'tax/' . $query_obj->taxonomy . '/';
-        } elseif ( is_single() ) {
-            $assets_path = 'post/' . $query_obj->post_type . '/';
-        }
-
         // set assets path
-        $page_path = $this->getPostCacheDirectory( $post->post_name, $assets_path );
-
+        $page_path = $this->getPath();
         // minify the resources that need to
         self::minify( $page_path );
-
-        // dequeue required resources
+        // dequeue all resources resources
         self::dequeue();
-
         // enqueue as one again
-        wp_enqueue_style( 'up-cache-styles', $this->getCacheDirectoryUri( $post->post_name, $assets_path ) . '/up-cache.css' );
-        wp_enqueue_script( 'up-cache-scripts', $this->getCacheDirectoryUri( $post->post_name, $assets_path ) . '/up-cache.js',
-            array( 'jquery' ), null, true );
+        self::enqueue();
     }
 
     /**
@@ -279,6 +300,15 @@ class UpCacheBase {
     private static function dequeue(): void {
         self::dequeueResources( self::getStyles(), ResourceTypes::CSS );
         self::dequeueResources( self::getScripts(), ResourceTypes::JS );
+    }
+
+    /**
+     * @return void
+     */
+    private static function enqueue(): void {
+        wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/up-cache.css' );
+        wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/up-cache.js',
+            array( 'jquery' ), null, true );
     }
 
     /**
