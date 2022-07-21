@@ -20,6 +20,10 @@ By default, Up Cache have implemented 2 rules:
 - Get from options the user added ignore assets
 - Listen on Perfmatters plugin disabled assets per page rules
 
+**GZIP -** Up Cache tries to understand by itself if your PHP installation supports 
+gzip compression, if it is, then gzip is enabled by default. 
+You can switch ON/OFF the gzip compression by hooking on filter `upio_up_cache_gzip_enable`
+
 How rules works
 ------------------
 There are three type of rules for each asset:
