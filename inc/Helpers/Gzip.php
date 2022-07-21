@@ -38,19 +38,20 @@ class Gzip
 
     public static function isGzipEnabled (): bool
     {
-        $isGzip = false;
+        $isGzip = true;
         // Check PHP gzip support
-        if ( ( function_exists( 'ob_gzhandler' )
-            && ini_get( 'zlib.output_compression' ) ) ) {
-            $isGzip = true;
-        }
-        // Check Apache web server, you can overwrite those mods by hook on the filter.
-        $apacheMods = ['mod_deflate', 'mod_gzip'];
-        if ( count( array_intersect(
-            apply_filters( 'upio_up_cache_gzip_apache_mods', $apacheMods ),
-            apache_get_modules())) < 1 ) {
+        if ( ( !function_exists( 'ob_gzhandler' )
+            || !ini_get( 'zlib.output_compression' ) ) ) {
             $isGzip = false;
+
         }
-        return $isGzip;
+        if (function_exists('apache_get_modules')) {
+            if ( count( array_intersect(
+                    apply_filters( 'upio_up_cache_gzip_apache_mods', ['mod_deflate', 'mod_gzip'] ),
+                    apache_get_modules())) > 0 ) {
+                $isGzip = true;
+            }
+        }
+        return apply_filters( 'upio_up_cache_g1zip_enable', $isGzip );
     }
 }

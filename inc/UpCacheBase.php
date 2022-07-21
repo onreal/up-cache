@@ -17,10 +17,7 @@ class UpCacheBase {
     private array $pluginOptions = array();
     private Helpers\Gzip $gzipHelper;
 
-    /**
-     * @param array $pluginOptions
-     */
-    public function __construct(array $pluginOptions)
+    public function __construct()
     {
         if (Helpers\Gzip::isGzipEnabled()) {
             $this->gzipHelper = new Helpers\Gzip();
@@ -327,12 +324,16 @@ class UpCacheBase {
      * @return void
      */
     private static function enqueue(): void {
-        $gz_ext = '';
+
         if (Helpers\Gzip::isGzipEnabled()) {
-            $gz_ext = '.gz';
+            global $compress_scripts, $concatenate_scripts;
+            $compress_scripts = 1;
+            $concatenate_scripts = 1;
+            define('ENFORCE_GZIP', true);
         }
-        wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/up-cache.css' . $gz_ext );
-        wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/up-cache.js' . $gz_ext,
+
+        wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/up-cache.css' );
+        wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/up-cache.js',
             array( 'jquery' ), null, true );
     }
 
@@ -343,7 +344,7 @@ class UpCacheBase {
      * @param $name
      * @return void
      */
-    private static function minifySources($sources, $path, $minifier, $name ): void {
+    private static function minifySources( $sources, $path, $minifier, $name ): void {
         $required = self::getResourcesByType( $sources, LifecycleTypes::Required );
         $ignored  = self::getResourcesByType( $sources, LifecycleTypes::Ignored );
 
@@ -380,7 +381,6 @@ class UpCacheBase {
         $ignored  = self::getResourcesByType( $sources, LifecycleTypes::Ignored );
         $required  = self::getResourcesByType( $sources, LifecycleTypes::Required );
         foreach ( $required as $key => $value ) {
-
             if ( in_array( $key, $ignored ) ) { continue; }
             if ( $source_type == ResourceTypes::CSS ) {
                 wp_dequeue_style( $key );
