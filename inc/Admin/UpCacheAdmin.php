@@ -2,16 +2,19 @@
 
 namespace Upio\UpCache\Admin;
 
+use Upio\UpCache\Helpers\CacheManagment;
+
 class UpCacheAdmin
 {
     private $upcache_options;
 
     public function __construct()
     {
+        $cacheManagment = new CacheManagment();
         add_action('admin_menu', array($this, 'upCacheAddPluginPage'));
         add_action('admin_init', array($this, 'upCachePageInit'));
         add_action('admin_bar_menu', array($this, 'clearCacheButton'), 999);
-        add_action('admin_post_clear_cache', array($this, 'clearCache'));
+        add_action('admin_post_clear_cache', array($cacheManagment, 'clearCacheAdmin'));
     }
 
     public function upCacheAddPluginPage()
@@ -195,30 +198,6 @@ class UpCacheAdmin
             )
         );
         $wp_admin_bar->add_node($args);
-    }
-
-    public function clearCache()
-    {
-        $uploads_directory_path = wp_get_upload_dir();
-
-        if (file_exists($uploads_directory_path['basedir'] . '/up-cache/')) {
-            $this->removeLocalResources($uploads_directory_path['basedir'] . '/up-cache/');
-        }
-
-        wp_safe_redirect(esc_url_raw(wp_get_referer()));
-        exit;
-    }
-
-    public function removeLocalResources($dir)
-    {
-        foreach (glob($dir . '/*') as $file) {
-            if (is_dir($file)) {
-                $this->removeLocalResources($file);
-            } else {
-                unlink($file);
-            }
-        }
-        rmdir($dir);
     }
 }
 

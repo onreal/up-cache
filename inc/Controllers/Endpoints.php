@@ -2,6 +2,7 @@
 
 namespace Upio\UpCache\Controllers;
 
+use Upio\UpCache\Helpers\CacheManagment;
 use WP_REST_Response;
 
 /**
@@ -34,6 +35,12 @@ class Endpoints
     public function clearCache(): WP_REST_Response
     {
         $resp = array('message' => 'OK');
+        $cacheManagment = new CacheManagment();
+        if ( $cacheManagment->clearCache() ) {
+            $resp['message'] = 'cache_clear_completed';
+        } else {
+            $resp['message'] = 'no_need_to_clear_cache';
+        }
 
         return new WP_REST_Response($resp, 200);
     }
