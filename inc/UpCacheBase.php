@@ -252,7 +252,7 @@ class UpCacheBase
     {
         global $wp_styles;
         $styles = self::redeclareResources($wp_styles, self::getStyles());
-        self::setStyles(array(LifecycleTypes::Required => $styles));
+        self::setStyles(array(LifecycleTypes::Require => $styles));
     }
 
     /**
@@ -263,7 +263,7 @@ class UpCacheBase
         // if ( !self::getScripts() ) { return; }
         global $wp_scripts;
         $scripts = self::redeclareResources($wp_scripts, self::getScripts());
-        self::setScripts(array(LifecycleTypes::Required => $scripts));
+        self::setScripts(array(LifecycleTypes::Require => $scripts));
     }
 
     /**
@@ -274,7 +274,7 @@ class UpCacheBase
      */
     private static function redeclareResources($wp_resource, $sources): array
     {
-        $removed = self::getResourcesByType($sources, LifecycleTypes::Removed);
+        $removed = self::getResourcesByType($sources, LifecycleTypes::Remove);
         $resources = array();
         foreach ($wp_resource->queue as $key) {
             if (empty($wp_resource->registered[$key]->src)) {
@@ -427,8 +427,8 @@ class UpCacheBase
      */
     private static function minifySources($sources, $path, $minifier, $name): void
     {
-        $required = self::getResourcesByType($sources, LifecycleTypes::Required);
-        $ignored = self::getResourcesByType($sources, LifecycleTypes::Ignored);
+        $required = self::getResourcesByType($sources, LifecycleTypes::Require);
+        $ignored = self::getResourcesByType($sources, LifecycleTypes::Ignore);
 
         foreach ($required as $key => $src) {
             if (in_array($key, $ignored)) {
@@ -461,8 +461,8 @@ class UpCacheBase
      */
     private static function dequeueResources($sources, $source_type): void
     {
-        $ignored = self::getResourcesByType($sources, LifecycleTypes::Ignored);
-        $required = self::getResourcesByType($sources, LifecycleTypes::Required);
+        $ignored = self::getResourcesByType($sources, LifecycleTypes::Ignore);
+        $required = self::getResourcesByType($sources, LifecycleTypes::Require);
         foreach ($required as $key => $value) {
             if (in_array($key, $ignored)) {
                 continue;

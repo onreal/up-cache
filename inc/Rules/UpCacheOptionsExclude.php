@@ -14,7 +14,7 @@ class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
             return;
         }
         $excluded = explode(',', $excluded);
-        self::setStyles(array(LifecycleTypes::Ignored => $excluded));
+        self::setStyles(array(LifecycleTypes::Ignore => $excluded));
     }
 
     public function setJs(): void
@@ -24,7 +24,7 @@ class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
             return;
         }
         $excluded = explode(',', $excluded);
-        self::setStyles(array(LifecycleTypes::Ignored => $excluded));
+        self::setStyles(array(LifecycleTypes::Ignore => $excluded));
     }
 
     public function setName(): void

@@ -73,12 +73,12 @@ class UpCachePerfmatters extends UpCacheBase implements IUpCacheRules
 
     public function setCss(): void
     {
-        self::setStyles(array(LifecycleTypes::Removed => $this->getScriptManagerRemovedType(ResourceTypes::CSS)));
+        self::setStyles(array(LifecycleTypes::Remove => $this->getScriptManagerRemovedType(ResourceTypes::CSS)));
     }
 
     public function setJs(): void
     {
-        self::setScripts(array(LifecycleTypes::Removed => $this->getScriptManagerRemovedType(ResourceTypes::JS)));
+        self::setScripts(array(LifecycleTypes::Remove => $this->getScriptManagerRemovedType(ResourceTypes::JS)));
     }
 
     public function setName(): void
