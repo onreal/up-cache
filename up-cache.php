@@ -3,7 +3,7 @@
 Plugin Name: UpCache Aggressive Caching
 Plugin URI: https://github.com/onreal/up-cache
 Description: Up Cache is an aggressive caching plugin for WordPress build with developers in mind. On it's core Up Cache is fully extensible in order to write your own rules by just implementing one small interface on your theme or plugin.
-Version: 1.0.0
+Version: 1.1.1
 Author: Margarit Koka <UPIO>
 Author URI: https://upio.gr/
 Update URI: https://github.com/onreal/up-cache
