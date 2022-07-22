@@ -4,9 +4,10 @@ namespace Upio\UpCache;
 
 require UP_CACHE_LIBS_PATH . '/loader.php';
 
-use Upio\UpCache\Types\AssetFileExtension;
-use Upio\UpCache\Types\LifecycleTypes;
-use Upio\UpCache\Types\ResourceTypes;
+use ReflectionClass;
+use Upio\UpCache\Enums\AssetFileExtension;
+use Upio\UpCache\Enums\LifecycleTypes;
+use Upio\UpCache\Enums\ResourceTypes;
 use Upio\UpCache\Rules;
 use Upio\UpCache\Helpers;
 use MatthiasMullie\Minify;
@@ -15,7 +16,7 @@ class UpCacheBase
 {
     private static array $scripts = array();
     private static array $styles = array();
-    private static string $supportName;
+    private static string $ruleName;
     private array $pluginOptions = array();
     private Helpers\Gzip $gzipHelper;
 
@@ -66,7 +67,7 @@ class UpCacheBase
      */
     protected static function setScripts(array $scripts): void
     {
-        if (empty($scripts)) {
+        if (!self::validateRule($scripts)) {
             return;
         }
 
@@ -87,12 +88,46 @@ class UpCacheBase
      */
     public static function setStyles(array $styles): void
     {
-        if (empty($styles)) {
+        if (!self::validateRule($styles)) {
             return;
         }
 
         $styles = self::setResourceByType($styles, self::$styles);
         self::$styles = $styles;
+    }
+
+    /**
+     * @param $rules
+     * @return bool
+     */
+    public static function validateRule($rules): bool {
+        if (empty($rules)) {
+            return false;
+        }
+        if (!self::validateRuleByKey($rules)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Here we use reflection in order to get the types enum constants from an abstract class
+     * and validate with the incoming rules type.
+     * @param $rules
+     * @return bool
+     */
+    public static function validateRuleByKey ($rules): bool {
+        $rulesType = array_keys( $rules );
+        // TODO check performance here, for the sake of time
+        $lifecycleTypes = new ReflectionClass('Upio\UpCache\Enums\LifecycleTypes');
+        $allowed_types = array_values( $lifecycleTypes->getConstants() );
+        foreach ( $rulesType as $type ) {
+            if ( !in_array( $type, $allowed_types ) ) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -113,17 +148,17 @@ class UpCacheBase
     /**
      * @return string
      */
-    protected static function getSupportName(): string
+    protected static function getRuleName(): string
     {
-        return self::$supportName;
+        return self::$ruleName;
     }
 
     /**
-     * @param string $supportName
+     * @param string $ruleName
      */
-    protected static function setSupportName(string $supportName): void
+    protected static function setRuleName(string $ruleName): void
     {
-        self::$supportName = $supportName;
+        self::$ruleName = $ruleName;
     }
 
     /**
@@ -136,7 +171,6 @@ class UpCacheBase
      */
     private static function setResourceByType($resources, $extension): array
     {
-
         if (empty($resources)) {
             return $extension;
         }
@@ -293,9 +327,13 @@ class UpCacheBase
      */
     public function startCaching(): void
     {
-        add_action('wp_enqueue_scripts', array($this, 'runCaching'), 101);
+        add_action('wp_enqueue_scripts', array( $this, 'runCaching' ), PHP_INT_MAX );
     }
 
+    /**
+     * @param $path
+     * @return bool
+     */
     public static function isPageCached($path): bool
     {
         if (file_exists($path . '/' . AssetFileExtension::Styles)
@@ -341,6 +379,9 @@ class UpCacheBase
         self::minifySources(self::getScripts(), $path, new Minify\JS(), AssetFileExtension::Scripts);
     }
 
+    /**
+     * @param $path
+     */
     private function gzip($path): void
     {
         if (!Helpers\Gzip::isGzipEnabled()) {
@@ -441,7 +482,7 @@ class UpCacheBase
      */
     private function runCacheRules(): void
     {
-        $rule_options = new Rules\UpCacheOptionsExclude();
+        $rule_options = new Rules\UpCacheHookRules();
         //$rule_perfmatter = new Rules\UpCachePerfmatters();
         $rules = array_filter(get_declared_classes(), function ($className) {
             return in_array('Upio\UpCache\Rules\IUpCacheRules', class_implements($className));
