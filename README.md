@@ -1,9 +1,17 @@
 Up Cache Aggressive Caching 
 ==================
-
 Up Cache is an aggressive caching plugin for WordPress build with developers in mind. 
 On it's core Up Cache is fully extensible in order to write your own rules by just implementing 
 one small interface on your theme or plugin.
+
+Up Cache have excellent performance, where many WordPress Caching plugins 
+cannot afford, you just have to follow the wordpress developers 
+guidelines when you work on your theme or plugin.
+
+There are some known limitations with some themes and builders, but I'm working toward Up Cache to fix those issues by itself.
+Example:
+ - Elementor builder unification support
+ - BuddyBoss Theme support. Implemented by ignoring by default BuddyBoss assets, but this is not what we want to. Our goal is to unify and minify everything. Still in experimental mode
 
 How it works
 ------------------
@@ -26,10 +34,10 @@ gzip compression, if it is, then gzip is enabled by default.
 You can switch ON/OFF the gzip compression by hooking on filter `upio_uc_gzip_enable`
 
 > Please note, this plugin is aggressive,
-> this means that you shouldn't activate in on a production environment without being sure,
-> but in case you did it and everything broke, then just deactivate.
+> this means that you SHOULD NOT activate in on a production environment without testing,
+> but in case you did it and everything broke, don't worry, just deactivate the plugin.
 
-How rules works
+How rules work
 ------------------
 There are three type of rules for each asset:
 - Ignore
@@ -42,7 +50,7 @@ There are three type of rules for each asset:
 
 **Included rules:** those assets are included on minification/unification
 
-How rules really works
+How hook rules work
 ------------------
 You can add you own rules by hooking into rules filter, check below:
 
@@ -69,7 +77,6 @@ There is also a REST endpoint where you can clean the site cache everytime is re
 
 Installation
 ------------
-
 To install and configure...
 
 1. Download the plugin repository as a zip file.
@@ -77,9 +84,15 @@ To install and configure...
 3. Activate the plugin under the `Plugins` admin menu.
 4. Manage caching under `Tools->UpCache`
 
+TODO
+------------
+1. Test plugin on more builders and WordPress installations (need help)
+2. Get rendered HTML page, and the second time page is loading skip WordPress rendering by providing the cached on.
+3. Get global assets from all WordPress hooks, and then decide by rules what to enqueue and what not. Currently, we get global for all assets with `wp_enqueue_script` action hook.
+4. Convert all page images to webp 
+
 Version change logs
 --------------
-
 ### 1.0.0
 Initial plugin version, WYSWYG
 ### 1.1.0
