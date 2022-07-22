@@ -1,6 +1,6 @@
 <?php
 
-namespace Upio\UpCache\Types;
+namespace Upio\UpCache\Enums;
 
 abstract class AssetFileExtension
 {
