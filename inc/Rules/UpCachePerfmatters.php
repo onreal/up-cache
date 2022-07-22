@@ -2,6 +2,11 @@
 
 namespace Upio\UpCache\Rules;
 
+// if perfmatters is not installed
+if ( function_exists('perfmatters_get_current_ID') ) {
+    exit;
+}
+
 use Upio\UpCache\Enums\LifecycleTypes;
 use Upio\UpCache\UpCacheBase;
 
@@ -80,4 +85,7 @@ class UpCachePerfmatters extends UpCacheBase implements IUpCacheRules
     {
         self::setRuleName('up_cache_perfmatters');
     }
+}
+if ( !class_exists('UpCachePerfmatters') ) {
+    $rule_perfmatters = new UpCachePerfmatters();
 }

@@ -32,3 +32,6 @@ class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
         self::setRuleName('admin_exclude_min_option_fields');
     }
 }
+if ( !class_exists('UpCacheOptionsExclude') ) {
+    $rule_options = new UpCacheOptionsExclude();
+}

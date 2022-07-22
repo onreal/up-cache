@@ -24,3 +24,7 @@ class UpCacheHookRules extends UpCacheBase implements IUpCacheRules
         self::setRuleName('hooked_rules');
     }
 }
+
+if ( !class_exists('UpCacheHookRules') ) {
+    $rule_hooks = new UpCacheHookRules();
+}

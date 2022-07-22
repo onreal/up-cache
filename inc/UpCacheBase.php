@@ -482,18 +482,22 @@ class UpCacheBase
      */
     private function runCacheRules(): void
     {
-        $rule_hooks = new Rules\UpCacheHookRules();
-        $rule_options = new Rules\UpCacheOptionsExclude();
-        //$rule_perfmatter = new Rules\UpCachePerfmatters();
         $rules = array_filter(get_declared_classes(), function ($className) {
             return in_array('Upio\UpCache\Rules\IUpCacheRules', class_implements($className));
         });
 
-        foreach ($rules as $key => $rule) {
-            $class = new $rule();
-            $class->setCss();
-            $class->setJs();
-            $class->setName();
+        foreach ( $rules as $key => $rule ) {
+            try {
+                $class = new $rule();
+                if ( !$class ) {
+                    continue;
+                }
+                $class->setCss();
+                $class->setJs();
+                $class->setName();
+            } catch (\Exception $exception) {
+                continue;
+            }
         }
     }
 }
