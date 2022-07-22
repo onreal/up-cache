@@ -62,13 +62,13 @@ class Beautifiers
      * Transform post slug into UTF-8 and english letters, by default the transform is disabled, but you can enable it by applying available filter and return true.
      * @Important Slugs are used in order to create folders path, when slug text is not Unicode ISO/IEC 8859-1
      * it seems that the cached assets can't be enqueued.
-     * @filters [ upio_up_cache_is_text_transform, upio_up_cache_text_transform ]
+     * @filters [ upio_uc_is_text_transform, upio_uc_text_transform ]
      * @param
      * @return string|null
      */
     public static function transform($slug): ?string
     {
-        if (apply_filters('upio_up_cache_is_text_transform', false)) return $slug;
-        return apply_filters('upio_up_cache_text_transform', self::setToGreeklish($slug));
+        if (apply_filters('upio_uc_is_text_transform', false)) return $slug;
+        return apply_filters('upio_uc_text_transform', self::setToGreeklish($slug));
     }
 }

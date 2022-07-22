@@ -22,7 +22,7 @@ By default, Up Cache have implemented 2 rules:
 
 **GZIP -** Up Cache tries to understand by itself if your PHP installation supports 
 gzip compression, if it is, then gzip is enabled by default. 
-You can switch ON/OFF the gzip compression by hooking on filter `upio_up_cache_gzip_enable`
+You can switch ON/OFF the gzip compression by hooking on filter `upio_uc_gzip_enable`
 
 How rules works
 ------------------

@@ -63,11 +63,11 @@ class Gzip
         // Check Apache gzip support
         if (function_exists('apache_get_modules')) {
             if (count(array_intersect(
-                    apply_filters('upio_up_cache_gzip_apache_mods', ['mod_deflate', 'mod_gzip']),
+                    apply_filters('upio_uc_gzip_apache_mods', ['mod_deflate', 'mod_gzip']),
                     apache_get_modules())) > 0) {
                 $isGzip = true;
             }
         }
-        return apply_filters('upio_up_cache_gzip_enable', $isGzip);
+        return apply_filters('upio_uc_gzip_enable', $isGzip);
     }
 }
