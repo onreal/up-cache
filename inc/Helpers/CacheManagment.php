@@ -23,15 +23,15 @@ class CacheManagment
         return false;
     }
 
-    private function deleteCache($dir)
+    private function deleteCache($path)
     {
-        foreach (glob($dir . '/*') as $file) {
+        foreach (glob($path . '/*') as $file) {
             if (is_dir($file)) {
                 $this->deleteCache($file);
             } else {
                 unlink($file);
             }
         }
-        rmdir($dir);
+        rmdir($path);
     }
 }

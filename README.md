@@ -57,6 +57,16 @@ add_filter( 'upio_uc_set_js_rules', $ignore_js );
 But also you can create your own advanced elegant solution by implementing `IUpCacheRules` interface. 
 There are only 3 methods, for more info, check how our rules are implemented.
 
+Cache manager controller
+------------------
+There is also a REST endpoint where you can clean the site cache everytime is requested.
+
+        /**
+         * Authorization : Basic base64(username:password)
+         * Method : GET
+         * URL : {site_url}/wp-json/upio/up-cache/cc
+         */
+
 Installation
 ------------
 
