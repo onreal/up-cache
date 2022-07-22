@@ -2,16 +2,11 @@
 
 namespace Upio\UpCache\Rules;
 
-use Upio\UpCache\Types\LifecycleTypes;
+use Upio\UpCache\Enums\LifecycleTypes;
 use Upio\UpCache\UpCacheBase;
 
 class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
 {
-    public static function getType(): string
-    {
-        return LifecycleTypes::Ignored;
-    }
-
     public function setCss(): void
     {
         $excluded = $this->getPluginOption('ignore_css_files_min');
@@ -19,7 +14,7 @@ class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
             return;
         }
         $excluded = explode(',', $excluded);
-        self::setStyles(array(self::getType() => $excluded));
+        self::setStyles(array(LifecycleTypes::Ignored => $excluded));
     }
 
     public function setJs(): void
@@ -29,11 +24,11 @@ class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
             return;
         }
         $excluded = explode(',', $excluded);
-        self::setStyles(array(self::getType() => $excluded));
+        self::setStyles(array(LifecycleTypes::Ignored => $excluded));
     }
 
-    public function setIntegrationName(): void
+    public function setName(): void
     {
-        self::setSupportName('up_cache_options');
+        self::setRuleName('admin_exclude_min_option_fields');
     }
 }

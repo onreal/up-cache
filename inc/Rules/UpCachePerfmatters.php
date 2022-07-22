@@ -2,17 +2,12 @@
 
 namespace Upio\UpCache\Rules;
 
-use Upio\UpCache\Types\LifecycleTypes;
+use Upio\UpCache\Enums\LifecycleTypes;
 use Upio\UpCache\UpCacheBase;
 
 class UpCachePerfmatters extends UpCacheBase implements IUpCacheRules
 {
     private array $scriptManager;
-
-    public static function getType(): string
-    {
-        return LifecycleTypes::Removed;
-    }
 
     /**
      * @return array
@@ -73,16 +68,16 @@ class UpCachePerfmatters extends UpCacheBase implements IUpCacheRules
 
     public function setCss(): void
     {
-        self::setStyles(array(self::getType() => $this->getScriptManagerRemovedType(ResourceTypes::CSS)));
+        self::setStyles(array(LifecycleTypes::Removed => $this->getScriptManagerRemovedType(ResourceTypes::CSS)));
     }
 
     public function setJs(): void
     {
-        self::setScripts(array(self::getType() => $this->getScriptManagerRemovedType(ResourceTypes::JS)));
+        self::setScripts(array(LifecycleTypes::Removed => $this->getScriptManagerRemovedType(ResourceTypes::JS)));
     }
 
-    public function setIntegrationName(): void
+    public function setName(): void
     {
-        self::setSupportName('up_cache_perfmatters');
+        self::setRuleName('up_cache_perfmatters');
     }
 }
