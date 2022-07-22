@@ -15,14 +15,19 @@ In order to exclude assets from minification visit the plugin options under menu
 
 For advanced rules, well, you can create your own rules on your theme or plugin by just implementing one small interface.
 
-By default, Up Cache have implemented 2 rules:
- 
-- Get from options the user added ignore assets
+By default, Up Cache have implemented 3 rules:
+
+- Get hooked rules, check below
+- Get options rules set by Admin `Tools->UpCache`
 - Listen on Perfmatters plugin disabled assets per page rules
 
 **GZIP -** Up Cache tries to understand by itself if your PHP installation supports 
 gzip compression, if it is, then gzip is enabled by default. 
 You can switch ON/OFF the gzip compression by hooking on filter `upio_uc_gzip_enable`
+
+> Please note, this plugin is aggressive,
+> this means that you shouldn't activate in on a production environment without being sure,
+> but in case you did it and everything broke, then just deactivate.
 
 How rules works
 ------------------
@@ -51,10 +56,6 @@ add_filter( 'upio_uc_set_js_rules', $ignore_js );
 
 But also you can create your own advanced elegant solution by implementing `IUpCacheRules` interface. 
 There are only 3 methods, for more info, check how our rules are implemented.
-
-> Please note, this plugin is aggressive, 
-> this means that you shouldn't activate in on a production environment without being sure,
-> but in case you did it and everything broke, then just deactivate. 
 
 Installation
 ------------
