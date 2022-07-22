@@ -5,9 +5,9 @@ namespace Upio\UpCache;
 require UP_CACHE_LIBS_PATH . '/loader.php';
 
 use ReflectionClass;
-use Upio\UpCache\Enums\AssetFileExtension;
-use Upio\UpCache\Enums\LifecycleTypes;
-use Upio\UpCache\Enums\ResourceTypes;
+use Upio\UpCache\Enums\AssetFileName;
+use Upio\UpCache\Enums\LifecycleType;
+use Upio\UpCache\Enums\AssetExtension;
 use Upio\UpCache\Rules;
 use Upio\UpCache\Helpers;
 use MatthiasMullie\Minify;
@@ -120,7 +120,7 @@ class UpCacheBase
     public static function validateRuleByKey ($rules): bool {
         $rulesType = array_keys( $rules );
         // TODO check performance here, for the sake of time
-        $lifecycleTypes = new ReflectionClass('Upio\UpCache\Enums\LifecycleTypes');
+        $lifecycleTypes = new ReflectionClass('Upio\UpCache\Enums\LifecycleType');
         $allowed_types = array_values( $lifecycleTypes->getConstants() );
         foreach ( $rulesType as $type ) {
             if ( !in_array( $type, $allowed_types ) ) {
@@ -252,7 +252,7 @@ class UpCacheBase
     {
         global $wp_styles;
         $styles = self::redeclareResources($wp_styles, self::getStyles());
-        self::setStyles(array(LifecycleTypes::Require => $styles));
+        self::setStyles(array(LifecycleType::Require => $styles));
     }
 
     /**
@@ -263,7 +263,7 @@ class UpCacheBase
         // if ( !self::getScripts() ) { return; }
         global $wp_scripts;
         $scripts = self::redeclareResources($wp_scripts, self::getScripts());
-        self::setScripts(array(LifecycleTypes::Require => $scripts));
+        self::setScripts(array(LifecycleType::Require => $scripts));
     }
 
     /**
@@ -274,7 +274,7 @@ class UpCacheBase
      */
     private static function redeclareResources($wp_resource, $sources): array
     {
-        $removed = self::getResourcesByType($sources, LifecycleTypes::Remove);
+        $removed = self::getResourcesByType($sources, LifecycleType::Remove);
         $resources = array();
         foreach ($wp_resource->queue as $key) {
             if (empty($wp_resource->registered[$key]->src)) {
@@ -336,8 +336,8 @@ class UpCacheBase
      */
     public static function isPageCached($path): bool
     {
-        if (file_exists($path . '/' . AssetFileExtension::Styles)
-            && file_exists($path . '/' . AssetFileExtension::Scripts)) {
+        if (file_exists($path . '/' . AssetFileName::Style)
+            && file_exists($path . '/' . AssetFileName::Script)) {
             return true;
         }
         return false;
@@ -375,8 +375,8 @@ class UpCacheBase
      */
     private static function minify($path): void
     {
-        self::minifySources(self::getStyles(), $path, new Minify\CSS(), AssetFileExtension::Styles);
-        self::minifySources(self::getScripts(), $path, new Minify\JS(), AssetFileExtension::Scripts);
+        self::minifySources(self::getStyles(), $path, new Minify\CSS(), AssetFileName::Style);
+        self::minifySources(self::getScripts(), $path, new Minify\JS(), AssetFileName::Script);
     }
 
     /**
@@ -387,8 +387,8 @@ class UpCacheBase
         if (!Helpers\Gzip::isGzipEnabled()) {
             return;
         }
-        $this->gzipSources($path, AssetFileExtension::Styles);
-        $this->gzipSources($path, AssetFileExtension::Scripts);
+        $this->gzipSources($path, AssetFileName::Style);
+        $this->gzipSources($path, AssetFileName::Script);
     }
 
     /**
@@ -396,8 +396,8 @@ class UpCacheBase
      */
     private static function dequeue(): void
     {
-        self::dequeueResources(self::getStyles(), ResourceTypes::CSS);
-        self::dequeueResources(self::getScripts(), ResourceTypes::JS);
+        self::dequeueResources(self::getStyles(), AssetExtension::CSS);
+        self::dequeueResources(self::getScripts(), AssetExtension::JS);
     }
 
     /**
@@ -413,8 +413,8 @@ class UpCacheBase
             define('ENFORCE_GZIP', true);
         }
 
-        wp_enqueue_style('up-cache-styles', self::getCacheDirectoryUri() . '/' . AssetFileExtension::Styles);
-        wp_enqueue_script('up-cache-scripts', self::getCacheDirectoryUri() . '/' . AssetFileExtension::Scripts,
+        wp_enqueue_style('up-cache-styles', self::getCacheDirectoryUri() . '/' . AssetFileName::Style);
+        wp_enqueue_script('up-cache-scripts', self::getCacheDirectoryUri() . '/' . AssetFileName::Script,
             array('jquery'), null, true);
     }
 
@@ -427,8 +427,8 @@ class UpCacheBase
      */
     private static function minifySources($sources, $path, $minifier, $name): void
     {
-        $required = self::getResourcesByType($sources, LifecycleTypes::Require);
-        $ignored = self::getResourcesByType($sources, LifecycleTypes::Ignore);
+        $required = self::getResourcesByType($sources, LifecycleType::Require);
+        $ignored = self::getResourcesByType($sources, LifecycleType::Ignore);
 
         foreach ($required as $key => $src) {
             if (in_array($key, $ignored)) {
@@ -461,13 +461,13 @@ class UpCacheBase
      */
     private static function dequeueResources($sources, $source_type): void
     {
-        $ignored = self::getResourcesByType($sources, LifecycleTypes::Ignore);
-        $required = self::getResourcesByType($sources, LifecycleTypes::Require);
+        $ignored = self::getResourcesByType($sources, LifecycleType::Ignore);
+        $required = self::getResourcesByType($sources, LifecycleType::Require);
         foreach ($required as $key => $value) {
             if (in_array($key, $ignored)) {
                 continue;
             }
-            if ($source_type == ResourceTypes::CSS) {
+            if ($source_type == AssetExtension::CSS) {
                 wp_dequeue_style($key);
                 wp_deregister_style($key);
             } else {
