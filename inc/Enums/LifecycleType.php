@@ -2,7 +2,7 @@
 
 namespace Upio\UpCache\Enums;
 
-abstract class LifecycleTypes
+abstract class LifecycleType
 {
     const Ignore = 'ignore';
     const Remove = 'remove';

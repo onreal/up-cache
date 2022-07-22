@@ -2,7 +2,7 @@
 
 namespace Upio\UpCache\Rules;
 
-use Upio\UpCache\Enums\LifecycleTypes;
+use Upio\UpCache\Enums\LifecycleType;
 use Upio\UpCache\UpCacheBase;
 
 class UpCacheHookRules extends UpCacheBase implements IUpCacheRules

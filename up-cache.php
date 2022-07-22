@@ -33,6 +33,7 @@ const UP_CACHE_RULES_PATH = UP_CACHE_INC_PATH . 'Rules';
 const UP_CACHE_ADMIN_PATH = UP_CACHE_INC_PATH . 'Admin';
 const UP_CACHE_CONTROLLERS_PATH = UP_CACHE_INC_PATH . 'Controllers';
 const UP_CACHE_TYPES_PATH = UP_CACHE_INC_PATH . 'Types';
+const UP_CACHE_GLOBAL_PREFIX = 'up-cache';
 
 include_once UP_CACHE_PATH . 'Autoloader.php';
 

@@ -2,7 +2,7 @@
 
 namespace Upio\UpCache\Rules;
 
-use Upio\UpCache\Enums\LifecycleTypes;
+use Upio\UpCache\Enums\LifecycleType;
 use Upio\UpCache\UpCacheBase;
 
 class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
@@ -14,7 +14,7 @@ class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
             return;
         }
         $excluded = explode(',', $excluded);
-        self::setStyles(array(LifecycleTypes::Ignore => $excluded));
+        self::setStyles(array(LifecycleType::Ignore => $excluded));
     }
 
     public function setJs(): void
@@ -24,7 +24,7 @@ class UpCacheOptionsExclude extends UpCacheBase implements IUpCacheRules
             return;
         }
         $excluded = explode(',', $excluded);
-        self::setStyles(array(LifecycleTypes::Ignore => $excluded));
+        self::setStyles(array(LifecycleType::Ignore => $excluded));
     }
 
     public function setName(): void

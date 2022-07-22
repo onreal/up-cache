@@ -7,7 +7,7 @@ if ( function_exists('perfmatters_get_current_ID') ) {
     exit;
 }
 
-use Upio\UpCache\Enums\LifecycleTypes;
+use Upio\UpCache\Enums\LifecycleType;
 use Upio\UpCache\UpCacheBase;
 
 class UpCachePerfmatters extends UpCacheBase implements IUpCacheRules
@@ -73,12 +73,12 @@ class UpCachePerfmatters extends UpCacheBase implements IUpCacheRules
 
     public function setCss(): void
     {
-        self::setStyles(array(LifecycleTypes::Remove => $this->getScriptManagerRemovedType(ResourceTypes::CSS)));
+        self::setStyles(array(LifecycleType::Remove => $this->getScriptManagerRemovedType(ResourceTypes::CSS)));
     }
 
     public function setJs(): void
     {
-        self::setScripts(array(LifecycleTypes::Remove => $this->getScriptManagerRemovedType(ResourceTypes::JS)));
+        self::setScripts(array(LifecycleType::Remove => $this->getScriptManagerRemovedType(ResourceTypes::JS)));
     }
 
     public function setName(): void
