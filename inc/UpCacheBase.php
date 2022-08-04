@@ -283,7 +283,7 @@ class UpCacheBase
      * @param $path
      * @return bool
      */
-    public static function isPageCached($path): bool
+    public static function isPageCached( $path ): bool
     {
         if (file_exists($path . '/' . AssetFileName::Style)
             && file_exists($path . '/' . AssetFileName::Script)) {
@@ -292,13 +292,23 @@ class UpCacheBase
         return false;
     }
 
+	/**
+	 * Please have in mind that first is executed wp_enqueue_scripts hook where does get only scripts and styles that are enqueued based on Wordpress recommended methods.
+	 * For a more Aggressive enqueue the set wp_footer enqueue to true
+	 */
+	private function enqueuedHook() {
+		return apply_filters( 'upio_uc_enqueued_hook', 'wp_enqueue_scripts' );
+	}
+
     /**
-     * @todo check more filters
+     * @todo check more filters wp_footer, wp_header
      * @return void
      */
     public function startCaching(): void
     {
-        add_action('wp_enqueue_scripts', array( $this, 'runCaching' ), PHP_INT_MAX );
+        add_action( $this->enqueuedHook(), array( $this, 'runCaching' ), PHP_INT_MAX );
+		// get header imports
+	    // get footer imports
     }
 
     /**
