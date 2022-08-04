@@ -4,11 +4,10 @@ namespace Upio\UpCache;
 
 require UP_CACHE_LIBS_PATH . '/loader.php';
 
-use ReflectionClass;
 use Upio\UpCache\Enums\AssetFileName;
 use Upio\UpCache\Enums\LifecycleType;
 use Upio\UpCache\Enums\AssetExtension;
-use Upio\UpCache\Rules;
+use Upio\UpCache\Helpers\Validators;
 use Upio\UpCache\Helpers;
 use MatthiasMullie\Minify;
 
@@ -67,7 +66,7 @@ class UpCacheBase
      */
     protected static function setScripts(array $scripts): void
     {
-        if (!self::validateRule($scripts)) {
+        if (!Validators::validateRule($scripts)) {
             return;
         }
 
@@ -86,48 +85,14 @@ class UpCacheBase
     /**
      * @param array $styles
      */
-    public static function setStyles(array $styles): void
+    protected static function setStyles(array $styles): void
     {
-        if (!self::validateRule($styles)) {
+        if (!Validators::validateRule($styles)) {
             return;
         }
 
         $styles = self::setResourceByType($styles, self::$styles);
         self::$styles = $styles;
-    }
-
-    /**
-     * @param $rules
-     * @return bool
-     */
-    public static function validateRule($rules): bool {
-        if (empty($rules)) {
-            return false;
-        }
-        if (!self::validateRuleByKey($rules)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Here we use reflection in order to get the types enum constants from an abstract class
-     * and validate with the incoming rules type.
-     * @param $rules
-     * @return bool
-     */
-    public static function validateRuleByKey ($rules): bool {
-        $rulesType = array_keys( $rules );
-        // TODO check performance here, for the sake of time
-        $lifecycleTypes = new ReflectionClass('Upio\UpCache\Enums\LifecycleType');
-        $allowed_types = array_values( $lifecycleTypes->getConstants() );
-        foreach ( $rulesType as $type ) {
-            if ( !in_array( $type, $allowed_types ) ) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -237,15 +202,6 @@ class UpCacheBase
     }
 
     /**
-     * @param $src
-     * @return bool
-     */
-    private static function validateSourceOrigin($src): bool
-    {
-        return strpos($src, get_site_url()) !== false;
-    }
-
-    /**
      * @return void
      */
     private function redeclareStyles(): void
@@ -281,7 +237,7 @@ class UpCacheBase
                 continue;
             }
 
-            if (!self::validateSourceOrigin($wp_resource->registered[$key]->src)) {
+            if (!Validators::validateSourceOrigin($wp_resource->registered[$key]->src)) {
                 continue;
             }
 
@@ -323,14 +279,6 @@ class UpCacheBase
     }
 
     /**
-     * @return void
-     */
-    public function startCaching(): void
-    {
-        add_action('wp_enqueue_scripts', array( $this, 'runCaching' ), PHP_INT_MAX );
-    }
-
-    /**
      * @param $path
      * @return bool
      */
@@ -341,6 +289,15 @@ class UpCacheBase
             return true;
         }
         return false;
+    }
+
+    /**
+     * @todo check more filters
+     * @return void
+     */
+    public function startCaching(): void
+    {
+        add_action('wp_enqueue_scripts', array( $this, 'runCaching' ), PHP_INT_MAX );
     }
 
     /**
