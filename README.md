@@ -86,16 +86,28 @@ To install and configure...
 
 TODO
 ------------
-1. Test plugin on more builders and WordPress installations (need help)
-2. Get rendered HTML page, and the second time page is loading skip WordPress rendering by providing the cached on.
-3. Get global assets from all WordPress hooks, and then decide by rules what to enqueue and what not. Currently, we get global for all assets with `wp_enqueue_script` action hook.
-4. Convert all page images to webp 
+1. Test plugin on more builders and WordPress installations -> In progress
+2. Separate scripts import and unification & caching into header and footer files -> In progress
+3. Mobile support
+4. CDN support
+5. Get rendered HTML page, and the second time page is loading skip WordPress rendering by providing the cached on.
+6. Get global assets from all WordPress hooks, and then decide by rules what to enqueue and what not. Currently, we get global for all assets with `wp_enqueue_script` action hook. -> Completed
+7. Convert all page images to webp 
+
+How to contribute ?
+------------
+If you want to contribute, then you are more than welcome! 
+Currently, there is a TODO list with things that need to be done, you can hang out with any item you prefer. 
+But what is most in need is this plugin to be tested on as much WordPress installations as possible, 
+this will assure a bug free plugin on most environments.
 
 Version change logs
 --------------
 ### 1.0.0
-Initial plugin version, WYSWYG
+Initial plugin version.
 ### 1.1.0
 Gzip compression for cached assets if it's supported by the environment - Default options on plugin activation - Refactor plugin codebase for better naming convention
 ### 1.1.1
 Rules management interface optimisation, validate rule types  - New rule in order to set rules by filter hook.
+### 1.1.2
+Add filter hook for assets caching globals.
