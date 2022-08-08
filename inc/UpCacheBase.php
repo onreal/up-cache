@@ -340,6 +340,8 @@ class UpCacheBase {
 		}
 		$this->gzipSources( $path, AssetFileName::Style );
 		$this->gzipSources( $path, AssetFileName::Script );
+		// set footer scripts
+		$this->gzipSources( $path, 'f-' . AssetFileName::Script );
 	}
 
 	/**
