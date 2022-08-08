@@ -357,18 +357,26 @@ class UpCacheBase {
 	 */
 	private static function enqueue(): void {
 
-		if ( Helpers\Gzip::isGzipEnabled() ) {
-			global $compress_scripts, $concatenate_scripts;
-			$compress_scripts    = 1;
-			$concatenate_scripts = 1;
-			define( 'ENFORCE_GZIP', true );
-		}
+		self::gzipEnqueueAssets();
 
 		wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/' . AssetFileName::Style );
 		wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/' . AssetFileName::Script,
 			array( 'jquery' ), null, false );
 		wp_enqueue_script( 'up-cache-footer-scripts', self::getCacheDirectoryUri() . '/f-' . AssetFileName::Script,
 			array( 'jquery' ), null, true );
+	}
+
+	/**
+	 * Set enqueued gzip assets
+	 */
+	private static function gzipEnqueueAssets () {
+		if ( !Helpers\Gzip::isGzipEnabled() ) {
+			return;
+		}
+		global $compress_scripts, $concatenate_scripts;
+		$compress_scripts    = 1;
+		$concatenate_scripts = 1;
+		define( 'ENFORCE_GZIP', true );
 	}
 
 	/**
