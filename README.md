@@ -87,12 +87,13 @@ To install and configure...
 TODO
 ------------
 1. Test plugin on more builders and WordPress installations -> In progress
-2. Separate scripts import and unification & caching into header and footer files -> In progress
+2. Multisite support -> In progress
 3. Mobile support
 4. CDN support
-5. Get rendered HTML page, and the second time page is loading skip WordPress rendering by providing the cached on.
-6. Get global assets from all WordPress hooks, and then decide by rules what to enqueue and what not. Currently, we get global for all assets with `wp_enqueue_script` action hook. -> Completed
-7. Convert all page images to webp 
+5. Convert all images to webp
+6. Cache HTML page
+7. Get global assets from all WordPress hooks, and then decide by rules what to enqueue and what not. Currently, we get global for all assets with `wp_enqueue_script` action hook. -> Completed
+8. Separate scripts import and unification & caching into header and footer files -> Completed in v1.1.3
 
 How to contribute ?
 ------------
