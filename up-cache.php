@@ -76,8 +76,8 @@ class UpCache {
                 'keep_data_after_remove' => '1'
             ) );
         if ( is_multisite() )  {
-            update_blog_option( get_current_blod_id(), 'up_cache_rules', array() );
-            update_blog_option( get_current_blod_id(), 'up_cache_options', $options );
+            update_blog_option( get_current_blog_id(), 'up_cache_rules', array() );
+            update_blog_option( get_current_blog_id(), 'up_cache_options', $options );
         } else {
             update_option( 'up_cache_rules', array() );
             update_option( 'up_cache_options', $options );
