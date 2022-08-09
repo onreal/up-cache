@@ -14,6 +14,7 @@ use MatthiasMullie\Minify;
 class UpCacheBase {
 	private static array $scripts = array();
 	private static array $styles = array();
+	private static array $footer_scripts = array();
 	private static string $ruleName;
 	private array $pluginOptions = array();
 	private Helpers\Gzip $gzipHelper;
@@ -23,6 +24,20 @@ class UpCacheBase {
 			$this->gzipHelper = new Helpers\Gzip();
 		}
 		$this->clearUnusedWPImports();
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function get_footer_scripts(): array {
+		return self::$footer_scripts;
+	}
+
+	/**
+	 * @param array $footer_scripts
+	 */
+	public static function set_footer_scripts( array $footer_scripts ): void {
+		self::$footer_scripts = $footer_scripts;
 	}
 
 	/**
@@ -66,7 +81,7 @@ class UpCacheBase {
 			return;
 		}
 
-		$scripts       = apply_filters( 'up_cache_set_js', self::setResourceByType( $scripts, self::getScripts() ), $scripts );
+		$scripts       = self::setResourceByType( $scripts, self::getScripts() );
 		self::$scripts = $scripts;
 	}
 
@@ -148,8 +163,6 @@ class UpCacheBase {
 	/**
 	 * Return cache directory path, if dir doesn't exist then we create it and return full local path
 	 *
-	 * @param $post_slug
-	 *
 	 * @return string|null
 	 */
 	protected function getCacheDirectory(): ?string {
@@ -192,28 +205,45 @@ class UpCacheBase {
 	/**
 	 * @return void
 	 */
-	private function redeclareStyles(): void {
+	private function declareStyles(): void {
 		global $wp_styles;
-		$styles = self::redeclareResources( $wp_styles, self::getStyles() );
+		$styles = self::declareResources( $wp_styles, self::getStyles(), false, false );
 		self::setStyles( array( LifecycleType::Require => $styles ) );
 	}
 
 	/**
 	 * @return void
 	 */
-	private function redeclareScripts(): void {
+	private function declareScripts(): void {
 		global $wp_scripts;
-		$scripts = self::redeclareResources( $wp_scripts, self::getScripts() );
+		$scripts = self::declareResources( $wp_scripts, self::getScripts(), false, true );
 		self::setScripts( array( LifecycleType::Require => $scripts ) );
 	}
 
 	/**
+	 * @return void
+	 */
+	private function declareFooterScripts(): void {
+		// clear required as this will run into another process
+		// TODO keep eye on this, propably bussiness have to change as order of execution is important here so we always remove footer scripts on the end
+		self::$scripts[LifecycleType::Require] = array();
+		global $wp_scripts;
+		$scripts = self::declareResources( $wp_scripts, self::getScripts(), true, true );
+		self::setScripts( array( LifecycleType::Require => $scripts ) );
+	}
+
+	/**
+	 * Declare and validate assets
+	 * @validate for assets sources. If is script validate if to import on footer or header operation
+	 * @rule Remove, all assets on remove rule will be ignored and will not unify/minified neither will be imported as a separate file
 	 * @param $wp_resource
 	 * @param $sources
+	 * @param $footer
+	 * @param $is_script
 	 *
 	 * @return array
 	 */
-	private static function redeclareResources( $wp_resource, $sources ): array {
+	private static function declareResources( $wp_resource, $sources, $footer, $is_script ): array {
 		$removed   = self::getResourcesByType( $sources, LifecycleType::Remove );
 		$resources = array();
 		foreach ( $wp_resource->queue as $key ) {
@@ -228,6 +258,22 @@ class UpCacheBase {
 			if ( in_array( $key, $removed ) ) {
 				continue;
 			}
+
+			if ( !$is_script ) {
+				$resources[ $key ] = $wp_resource->registered[ $key ]->src;
+				continue;
+			}
+
+			// requested for header but this is a footer script
+			if ( !$footer && self::isFooterScript( $key ) ) {
+				continue;
+			}
+
+			// requested for footer but this is a header script
+			if ( $footer && !self::isFooterScript( $key ) ) {
+				continue;
+			}
+
 			$resources[ $key ] = $wp_resource->registered[ $key ]->src;
 		}
 
@@ -264,11 +310,12 @@ class UpCacheBase {
 
 	/**
 	 * @param $path
+	 * @param string $prefix
 	 *
 	 * @return bool
 	 */
-	public static function isPageCached( $path ): bool {
-		if ( file_exists( $path . '/' . AssetFileName::Style )
+	public static function isPageCached( $path, string $prefix = '' ): bool {
+		if ( file_exists( $path . '/' . $prefix . AssetFileName::Style )
 		     && file_exists( $path . '/' . AssetFileName::Script ) ) {
 			return true;
 		}
@@ -295,6 +342,7 @@ class UpCacheBase {
 	 */
 	public function startCaching(): void {
 		add_action( $this->enqueuedHook(), array( $this, 'runCaching' ), PHP_INT_MAX );
+		add_action( 'wp_footer', array( $this, 'footerScriptsExecution' ), 11 );
 	}
 
 	/**
@@ -306,8 +354,8 @@ class UpCacheBase {
 		// get all caching rules
 		$this->runCacheRules();
 		// redeclare assets by rules
-		$this->redeclareStyles();
-		$this->redeclareScripts();
+		$this->declareStyles();
+		$this->declareScripts();
 		// check if needed to proceed into caching process
 		if ( ! self::isPageCached( $path ) ) {
 			// minify the resources that need to
@@ -318,7 +366,26 @@ class UpCacheBase {
 		// dequeue all resources
 		self::dequeue();
 		// enqueue as one again
-		self::enqueue();
+		self::enqueue(false);
+	}
+
+	public function footerScriptsExecution () {
+		$path = $this->getPath();
+		$this->declareFooterScripts();
+		if ( ! self::isPageCached( $path, 'f-' ) ) {
+			self::minifySources( self::getScripts(), $path, new Minify\JS(), 'f-' . AssetFileName::Script );
+			// set footer scripts
+			if ( Helpers\Gzip::isGzipEnabled() )
+			{
+				$this->gzipSources( $path, 'f-' . AssetFileName::Script );
+			}
+		}
+		// dequeue all footer resources
+		self::dequeue();
+		// enqueue as one again
+		self::enqueue(true);
+		// print the footer scripts html
+		print_footer_scripts();
 	}
 
 	/**
@@ -340,8 +407,6 @@ class UpCacheBase {
 		}
 		$this->gzipSources( $path, AssetFileName::Style );
 		$this->gzipSources( $path, AssetFileName::Script );
-		// set footer scripts
-		$this->gzipSources( $path, 'f-' . AssetFileName::Script );
 	}
 
 	/**
@@ -353,17 +418,25 @@ class UpCacheBase {
 	}
 
 	/**
+	 * @param bool $footer
+	 *
 	 * @return void
 	 */
-	private static function enqueue(): void {
+	private static function enqueue( bool $footer ): void {
 
 		self::gzipEnqueueAssets();
 
+		if ( $footer ) {
+			wp_enqueue_script( 'up-cache-footer-scripts', self::getCacheDirectoryUri() . '/f-' . AssetFileName::Script,
+				array( 'jquery' ), '6.6.6', true );
+
+			return;
+		}
+
 		wp_enqueue_style( 'up-cache-styles', self::getCacheDirectoryUri() . '/' . AssetFileName::Style );
 		wp_enqueue_script( 'up-cache-scripts', self::getCacheDirectoryUri() . '/' . AssetFileName::Script,
-			array( 'jquery' ), null, false );
-		wp_enqueue_script( 'up-cache-footer-scripts', self::getCacheDirectoryUri() . '/f-' . AssetFileName::Script,
-			array( 'jquery' ), null, true );
+			array( 'jquery' ), '6.6.6', false );
+
 	}
 
 	/**
@@ -390,29 +463,12 @@ class UpCacheBase {
 	private static function minifySources( $sources, $path, $minifier, $name ): void {
 		$required = self::getResourcesByType( $sources, LifecycleType::Require );
 		$ignored  = self::getResourcesByType( $sources, LifecycleType::Ignore );
-		$footer = array();
 		foreach ( $required as $key => $src ) {
 			if ( in_array( $key, $ignored ) ) {
 				continue;
 			}
-			if ( $name == AssetFileName::Script ) {
-				if ( self::isFooterScript( $key ) ) {
-					array_push( $footer, $src );
-					continue;
-				}
-			}
+
 			$minifier->add( str_replace( get_site_url() . '/', ABSPATH, $src ) );
-		}
-
-		// unify and minify footer scripts on a separate file.
-		if ( !empty( $footer ) ) {
-			$f_minifier = new Minify\JS();
-			foreach ($footer as $foo) {
-
-				$f_minifier->add( str_replace( get_site_url() . '/', ABSPATH, $foo ) );
-			}
-			$res_path = $path . '/f-' . $name;
-			$f_minifier->minify( $res_path );
 		}
 
 		$res_path = $path . '/' . $name;
@@ -420,17 +476,18 @@ class UpCacheBase {
 	}
 
 	/**
+	 * Check if is a footer script
 	 * @param $script
 	 *
 	 * @return bool
 	 */
 	private static function isFooterScript( $script ): bool {
 		global $wp_scripts;
-		$footer = $wp_scripts->do_footer_items();
-		$header = $wp_scripts->do_head_items();
-		if ( in_array( $script, $footer ) && ! in_array( $script, $header ) ) {
+
+		if ( $wp_scripts->get_data( $script, 'group' ) ) {
 			return true;
 		}
+
 
 		return false;
 	}
@@ -495,7 +552,7 @@ class UpCacheBase {
 
 	/**
 	 * Remove all unwanted wp imports
-	 * This idea is get from FASTESTCACHE plugin during reading their source code (couldn't find it on github).
+	 * This idea is get from FASTESTCACHE plugin during reading their source code (couldn't find it on github in order to put as reference).
 	 */
 	private function clearUnusedWPImports() {
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
