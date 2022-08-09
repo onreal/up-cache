@@ -16,9 +16,18 @@ Example:
 How it works
 ------------------
 From the moment that Up Cache plugin is installed and activated, 
-all assets (css, js) are minified, unified to a single file and cached under the uploads dir `wp-content/uploads/up-cache/*`. 
-Then Up Cache dequeue all WordPress assets and enqueue the minified ones. 
+all assets (css, js) are minified, unified to a single file and cached under the 
+uploads dir `wp-content/uploads/up-cache/*`. 
+Up Cache split scripts for footer & header import, 
+and thous it will create two script files if enqueues on footer is found.
 
+### Plugin lifecycle
+  - Process rules
+  - Minify & Unify assets
+  - Gzip assets
+  - Dequeue all assets based on rules
+  - Enqueue required assets based on rules
+  
 In order to exclude assets from minification visit the plugin options under menu `Tools->UpCache` .
 
 For advanced rules, well, you can create your own rules on your theme or plugin by just implementing one small interface.
@@ -32,6 +41,8 @@ By default, Up Cache have implemented 3 rules:
 **GZIP -** Up Cache tries to understand by itself if your PHP installation supports 
 gzip compression, if it is, then gzip is enabled by default. 
 You can switch ON/OFF the gzip compression by hooking on filter `upio_uc_gzip_enable`
+
+    add_filter('upio_uc_gzip_enable', '__return_true');
 
 > Please note, this plugin is aggressive,
 > this means that you SHOULD NOT activate in on a production environment without testing,
@@ -50,20 +61,57 @@ There are three type of rules for each asset:
 
 **Included rules:** those assets are included on minification/unification
 
-How hook rules work
+Hooked rules
 ------------------
 You can add you own rules by hooking into rules filter, check below:
 
-`$ignore_css = array( 'ignore' => array( 'skeleton', 'skeleton-css' ) );
-add_filter( 'upio_uc_set_css_rules', $ignore_css );
-`
+    $ignore_css = array( 'ignore' => array( 'skeleton', 'skeleton-css' ) );
+    add_filter( 'upio_uc_set_css_rules', $ignore_css );
 
-`$ignore_js = array( 'ignore' => array( 'gsap', 'elementor-js' ) );
-add_filter( 'upio_uc_set_js_rules', $ignore_js );
-`
+    $ignore_js = array( 'ignore' => array( 'gsap', 'elementor-js' ) );
+    add_filter( 'upio_uc_set_js_rules', $ignore_js );
 
 But also you can create your own advanced elegant solution by implementing `IUpCacheRules` interface. 
-There are only 3 methods, for more info, check how our rules are implemented.
+There are only 3 methods, for more info, check [how our rules are implemented](https://github.com/onreal/up-cache/tree/main/inc/Rules).
+
+Hooks
+------------------
+
+### Slug Transform
+
+Enable text transform for slug, by default this is false and does not transform slug. 
+Up Cache use slugs in order to create the filesystem path for the asset's files, 
+when slug text is not Unicode ISO/IEC 8859-1 then most probably this will be an issue on unix systems.
+
+Default transform once enabled is for Greek language. 
+Example, if your slug is in Greek language _**ονομα-σελιδας**_ then caching will break, 
+by activating slug transform, path will become to _**onoma-selidas**_ .
+
+In order to enable transform
+
+    add_filter( 'upio_uc_is_text_transform', '__return_true' );
+
+Set your custom transform
+
+    add_filter( 'upio_uc_text_transform', 'my_text_transform' );
+    function my_text_transform ($slug) {
+        // do whatever you want with the slug in order to transform into ISO/IEC 8859-1
+        return $slug
+    }
+
+### GZIP
+
+Up Cache tries to understand by itself if your PHP installation supports
+gzip compression, if it is, then gzip is enabled by default.
+
+You can switch ON/OFF the gzip compression by hooking on filter `upio_uc_gzip_enable`
+
+    add_filter( 'upio_uc_gzip_enable', '__return_true' );
+
+For Apache servers we check against these modules `['mod_deflate', 'mod_gzip']` 
+in order to decide if GZIP is enabled, if you use any other module then hook on `upio_uc_gzip_apache_mods`
+
+    add_filter( 'upio_uc_gzip_apache_mods', [ 'your', 'modules' ] );
 
 Cache manager controller
 ------------------
