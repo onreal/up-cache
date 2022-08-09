@@ -111,3 +111,5 @@ Gzip compression for cached assets if it's supported by the environment - Defaul
 Rules management interface optimisation, validate rule types  - New rule in order to set rules by filter hook.
 ### 1.1.2
 Add filter hook for assets caching globals.
+### 1.1.3
+Separate script assets on header and footer. Up Cache creates two unify/minified files for the script for header and footer, this increase stability even on builders like elementor, wp-bakery etc...
