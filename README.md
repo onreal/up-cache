@@ -8,10 +8,8 @@ Up Cache have excellent performance, where many WordPress Caching plugins
 cannot afford, you just have to follow the wordpress developers 
 guidelines when you work on your theme or plugin.
 
-There are some known limitations with some themes and builders, but I'm working toward Up Cache to fix those issues by itself.
-Example:
- - Elementor builder unification support
- - BuddyBoss Theme support. Implemented by ignoring by default BuddyBoss assets, but this is not what we want to. Our goal is to unify and minify everything. Still in experimental mode
+There are some known limitations with some themes and builders, 
+but I'm working toward Up Cache rules in order to fix those compatibility issues.
 
 How it works
 ------------------
@@ -150,15 +148,37 @@ Currently, there is a TODO list with things that need to be done, you can hang o
 But what is most in need is this plugin to be tested on as much WordPress installations as possible, 
 this will assure a bug free plugin on most environments.
 
+If you found any bug and know the solution, then create a Merge Request and I would love to review and merge.
+
+Support
+--------------
+It breaks your website ? 
+Then most probably your theme is really messed up and assets are not properly declared.
+One thing to do is to ignore one by one the scripts that breaks compatibility, 
+until you have the needed results. 
+Otherwise, you have to work you have to work with your theme or plugins 
+in order to proper enqueue your assets.
+
+But if you found any bug, please feel free to create an issue, 
+I'll do my best to response with a solution.
+
+If you want to see the full potentials of Up Cache,
+I'm also available for micro contracts in order to speed up your WordPress installation.
+`margarit[@]upio[.]gr`
+
 Version change logs
 --------------
+### 1.3.0
+  - Separate script assets on header and footer
+  - Up Cache creates two unify/minified files for the script for header and footer, this increase stability even on builders like elementor, wp-bakery etc...
+### 1.2.0
+  - Add filter hook for assets caching globals. 
+  - Rules management interface optimisation
+  - Validate rule types 
+  - New rule in order to set rules by filter hook.
+### 1.1.0
+  - Gzip compression for cached assets if it's supported by the environment
+  - Default options on plugin activation
+  - Refactor plugin codebase for better naming convention
 ### 1.0.0
 Initial plugin version.
-### 1.1.0
-Gzip compression for cached assets if it's supported by the environment - Default options on plugin activation - Refactor plugin codebase for better naming convention
-### 1.1.1
-Rules management interface optimisation, validate rule types  - New rule in order to set rules by filter hook.
-### 1.1.2
-Add filter hook for assets caching globals.
-### 1.1.3
-Separate script assets on header and footer. Up Cache creates two unify/minified files for the script for header and footer, this increase stability even on builders like elementor, wp-bakery etc...
