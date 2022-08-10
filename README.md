@@ -156,7 +156,7 @@ It breaks your website ?
 Then most probably your theme is really messed up and assets are not properly declared.
 One thing to do is to ignore one by one the scripts that breaks compatibility, 
 until you have the needed results. 
-Otherwise, you have to work you have to work with your theme or plugins 
+Otherwise, you have to work with your theme or plugins 
 in order to proper enqueue your assets.
 
 But if you found any bug, please feel free to create an issue, 
