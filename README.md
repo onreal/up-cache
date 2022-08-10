@@ -75,7 +75,7 @@ There are only 3 methods, for more info, check [how our rules are implemented](h
 Hooks
 ------------------
 
-### Slug Transform
+#### Slug Transform
 
 Enable text transform for slug, by default this is false and does not transform slug. 
 Up Cache use slugs in order to create the filesystem path for the asset's files, 
@@ -97,7 +97,7 @@ Set your custom transform
         return $slug
     }
 
-### GZIP
+#### GZIP
 
 Up Cache tries to understand by itself if your PHP installation supports
 gzip compression, if it is, then gzip is enabled by default.
